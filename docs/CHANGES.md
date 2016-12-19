@@ -2,7 +2,7 @@
 
 ## 3.0.0 (Unreleased)
 
-- Breaking change: Callbacks for `converse.on` now no longer receive an event
+- *Breaking change*: Callbacks for `converse.on` now no longer receive an event
   object as first parameter. [jcbrand]
 - Cancel button shown while the registration form is being fetched wasn't working
   properly. [jcbrand]

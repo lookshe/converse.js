@@ -1163,11 +1163,59 @@
 
             }));
 
-            it("to ban a user", mock.initConverse(function (converse) {
+            it("to make a user an owner", mock.initConverse(function (converse) {
+                var sent_IQ, IQ_id;
+                var sendIQ = converse.connection.sendIQ;
+                spyOn(converse.connection, 'sendIQ').andCallFake(function (iq, callback, errback) {
+                    sent_IQ = iq;
+                    IQ_id = sendIQ.bind(this)(iq, callback, errback);
+                });
                 test_utils.openChatRoom(converse, 'lounge', 'localhost', 'dummy');
                 var view = converse.chatboxviews.get('lounge@localhost');
                 spyOn(view, 'onMessageSubmitted').andCallThrough();
-                spyOn(view, 'setAffiliations').andCallThrough();
+                spyOn(view, 'setAffiliation').andCallThrough();
+                spyOn(view, 'showStatusNotification').andCallThrough();
+                spyOn(view, 'validateRoleChangeCommand').andCallThrough();
+                view.$el.find('.chat-textarea').text('/owner');
+                view.$el.find('textarea.chat-textarea').trigger($.Event('keypress', {keyCode: 13}));
+                expect(view.onMessageSubmitted).toHaveBeenCalled();
+                expect(view.validateRoleChangeCommand).toHaveBeenCalled();
+                expect(view.showStatusNotification).toHaveBeenCalledWith(
+                    "Error: the \"owner\" command takes two arguments, the user's nickname and optionally a reason.",
+                    true
+                );
+                expect(view.setAffiliation).not.toHaveBeenCalled();
+
+                // Call now with the correct amount of arguments.
+                // XXX: Calling onMessageSubmitted directly, trying
+                // again via triggering Event doesn't work for some weird
+                // reason.
+                view.onMessageSubmitted('/owner annoyingGuy@localhost You\'re annoying');
+                expect(view.validateRoleChangeCommand.callCount).toBe(2);
+                expect(view.showStatusNotification.callCount).toBe(1);
+                expect(view.setAffiliation).toHaveBeenCalled();
+                // Check that the member list now gets updated
+                expect(sent_IQ.toLocaleString()).toBe(
+                    "<iq to='lounge@localhost' type='set' xmlns='jabber:client' id='"+IQ_id+"'>"+
+                        "<query xmlns='http://jabber.org/protocol/muc#admin'>"+
+                            "<item affiliation='owner' jid='annoyingGuy@localhost'>"+
+                                "<reason>You&apos;re annoying</reason>"+
+                            "</item>"+
+                        "</query>"+
+                    "</iq>");
+            }));
+
+            it("to ban a user", mock.initConverse(function (converse) {
+                var sent_IQ, IQ_id;
+                var sendIQ = converse.connection.sendIQ;
+                spyOn(converse.connection, 'sendIQ').andCallFake(function (iq, callback, errback) {
+                    sent_IQ = iq;
+                    IQ_id = sendIQ.bind(this)(iq, callback, errback);
+                });
+                test_utils.openChatRoom(converse, 'lounge', 'localhost', 'dummy');
+                var view = converse.chatboxviews.get('lounge@localhost');
+                spyOn(view, 'onMessageSubmitted').andCallThrough();
+                spyOn(view, 'setAffiliation').andCallThrough();
                 spyOn(view, 'showStatusNotification').andCallThrough();
                 spyOn(view, 'validateRoleChangeCommand').andCallThrough();
                 view.$el.find('.chat-textarea').text('/ban');
@@ -1178,16 +1226,24 @@
                     "Error: the \"ban\" command takes two arguments, the user's nickname and optionally a reason.",
                     true
                 );
-                expect(view.setAffiliations).not.toHaveBeenCalled();
-
+                expect(view.setAffiliation).not.toHaveBeenCalled();
                 // Call now with the correct amount of arguments.
                 // XXX: Calling onMessageSubmitted directly, trying
                 // again via triggering Event doesn't work for some weird
                 // reason.
-                view.onMessageSubmitted('/ban jid This is the reason');
+                view.onMessageSubmitted('/ban annoyingGuy@localhost You\'re annoying');
                 expect(view.validateRoleChangeCommand.callCount).toBe(2);
                 expect(view.showStatusNotification.callCount).toBe(1);
-                expect(view.setAffiliations).toHaveBeenCalled();
+                expect(view.setAffiliation).toHaveBeenCalled();
+                // Check that the member list now gets updated
+                expect(sent_IQ.toLocaleString()).toBe(
+                    "<iq to='lounge@localhost' type='set' xmlns='jabber:client' id='"+IQ_id+"'>"+
+                        "<query xmlns='http://jabber.org/protocol/muc#admin'>"+
+                            "<item affiliation='outcast' jid='annoyingGuy@localhost'>"+
+                                "<reason>You&apos;re annoying</reason>"+
+                            "</item>"+
+                        "</query>"+
+                    "</iq>");
             }));
         });
 
@@ -1543,6 +1599,66 @@
                         "<x xmlns='jabber:x:conference' jid='coven@chat.shakespeare.lit' reason='Please join this chat room'/>"+
                     "</message>"
                 );
+            }));
+        });
+
+        describe("The affiliations delta", function () {
+
+            it("can be computed in various ways", mock.initConverse(function (converse) {
+                test_utils.openChatRoom(converse, 'coven', 'chat.shakespeare.lit', 'dummy');
+                var roomview = converse.chatboxviews.get('coven@chat.shakespeare.lit');
+
+                var exclude_existing = false;
+                var remove_absentees = false;
+                var new_list = [];
+                var old_list = [];
+                var delta = roomview.computeAffiliationsDelta(exclude_existing, remove_absentees, new_list, old_list);
+                expect(delta.length).toBe(0);
+
+                new_list = [{'jid': 'wiccarocks@shakespeare.lit', 'affiliation': 'member'}];
+                old_list = [{'jid': 'wiccarocks@shakespeare.lit', 'affiliation': 'member'}];
+                delta = roomview.computeAffiliationsDelta(exclude_existing, remove_absentees, new_list, old_list);
+                expect(delta.length).toBe(0);
+
+                // When remove_absentees is false, then affiliations in the old
+                // list which are not in the new one won't be removed.
+                old_list = [{'jid': 'oldhag666@shakespeare.lit', 'affiliation': 'owner'},
+                            {'jid': 'wiccarocks@shakespeare.lit', 'affiliation': 'member'}];
+                delta = roomview.computeAffiliationsDelta(exclude_existing, remove_absentees, new_list, old_list);
+                expect(delta.length).toBe(0);
+
+                // With exclude_existing set to false, any changed affiliations
+                // will be included in the delta (i.e. existing affiliations
+                // are included in the comparison).
+                old_list = [{'jid': 'wiccarocks@shakespeare.lit', 'affiliation': 'owner'}];
+                delta = roomview.computeAffiliationsDelta(exclude_existing, remove_absentees, new_list, old_list);
+                expect(delta.length).toBe(1);
+                expect(delta[0].jid).toBe('wiccarocks@shakespeare.lit');
+                expect(delta[0].affiliation).toBe('member');
+
+                // To also remove affiliations from the old list which are not
+                // in the new list, we set remove_absentees to true
+                remove_absentees = true;
+                old_list = [{'jid': 'oldhag666@shakespeare.lit', 'affiliation': 'owner'},
+                            {'jid': 'wiccarocks@shakespeare.lit', 'affiliation': 'member'}];
+                delta = roomview.computeAffiliationsDelta(exclude_existing, remove_absentees, new_list, old_list);
+                expect(delta.length).toBe(1);
+                expect(delta[0].jid).toBe('oldhag666@shakespeare.lit');
+                expect(delta[0].affiliation).toBe('none');
+
+                delta = roomview.computeAffiliationsDelta(exclude_existing, remove_absentees, [], old_list);
+                expect(delta.length).toBe(2);
+                expect(delta[0].jid).toBe('oldhag666@shakespeare.lit');
+                expect(delta[0].affiliation).toBe('none');
+                expect(delta[1].jid).toBe('wiccarocks@shakespeare.lit');
+                expect(delta[1].affiliation).toBe('none');
+
+                // To only add a user if they don't already have an
+                // affiliation, we set 'exclude_existing' to true
+                exclude_existing = true;
+                old_list = [{'jid': 'wiccarocks@shakespeare.lit', 'affiliation': 'owner'}];
+                delta = roomview.computeAffiliationsDelta(exclude_existing, remove_absentees, new_list, old_list);
+                expect(delta.length).toBe(0);
             }));
         });
     });

@@ -370,7 +370,8 @@
                     this.$el.find('.chat-content').on('scroll', this.markScrolled.bind(this));
 
                     this.getRoomFeatures().always(function () {
-                        that.join().fetchMessages();
+                        that.join();
+                        that.fetchMessages();
                         converse.emit('chatRoomOpened', that);
                     });
                 },
@@ -586,14 +587,59 @@
                     return delta;
                 },
 
+                setAffiliation: function (affiliation, members) {
+                    /* Send IQ stanzas to the server to set an affiliation for
+                     * the provided JIDs.
+                     *
+                     * See: http://xmpp.org/extensions/xep-0045.html#modifymember
+                     *
+                     * XXX: Prosody doesn't accept multiple JIDs' affiliations
+                     * being set in one IQ stanza, so as a workaround we send
+                     * a separate stanza for each JID.
+                     * Related ticket: https://prosody.im/issues/issue/795
+                     *
+                     * Parameters:
+                     *  (Object) members: A map of jids, affiliations and
+                     *      optionally reasons. Only those entries with the
+                     *      same affiliation as being currently set will be
+                     *      considered.
+                     *
+                     * Returns:
+                     *  A promise which resolves and fails depending on the
+                     *  XMPP server response.
+                     */
+                    members = _.filter(members, function (member) {
+                        // We only want those members who have the right
+                        // affiliation (or none, which implies the provided
+                        // one).
+                        return _.isUndefined(member.affiliation) ||
+                                member.affiliation === affiliation;
+                    });
+                    var promises = _.map(members, function (member) {
+                        var deferred = new $.Deferred();
+                        var iq = $iq({to: this.model.get('jid'), type: "set"})
+                            .c("query", {xmlns: Strophe.NS.MUC_ADMIN})
+                            .c("item", {
+                                'affiliation': member.affiliation || affiliation,
+                                'jid': member.jid
+                            });
+                        if (!_.isUndefined(member.reason)) {
+                            iq.c("reason", member.reason);
+                        }
+                        converse.connection.sendIQ(iq, deferred.resolve, deferred.reject);
+                        return deferred;
+                    }, this);
+                    return $.when.apply($, promises);
+                },
+
                 setAffiliations: function (members, onSuccess, onError) {
-                    /* Send an IQ stanza to the server to modify the
+                    /* Send IQ stanzas to the server to modify the
                      * affiliations in this room.
                      *
                      * See: http://xmpp.org/extensions/xep-0045.html#modifymember
                      *
                      * Parameters:
-                     *  (Object) members: A map of jids and affiliations
+                     *  (Object) members: A map of jids, affiliations and optionally reasons
                      *  (Function) onSuccess: callback for a succesful response
                      *  (Function) onError: callback for an error response
                      */
@@ -602,26 +648,9 @@
                         onSuccess(null);
                         return;
                     }
-                    var room_jid = this.model.get('jid');
                     var affiliations = _.uniq(_.pluck(members, 'affiliation'));
-                    _.each(affiliations, function (affiliation) {
-                        var iq = $iq({to: room_jid, type: "set"})
-                            .c("query", {xmlns: Strophe.NS.MUC_ADMIN});
-                        _.each(members, function (member) {
-                            if (member.affiliation !== affiliation) {
-                                return;
-                            }
-                            iq.c("item", {
-                                'affiliation': member.affiliation,
-                                'jid': member.jid
-                            });
-                            if (!_.isUndefined(member.reason)) {
-                                iq.c("reason", member.reason).up();
-                            }
-                            iq.up();
-                        });
-                        converse.connection.sendIQ(iq, onSuccess, onError);
-                    });
+                    var promises = _.map(affiliations, _.partial(this.setAffiliation, _, members), this);
+                    $.when.apply($, promises).done(onSuccess).fail(onError);
                 },
 
                 marshallAffiliationIQs: function () {
@@ -836,21 +865,17 @@
                     switch (match[1]) {
                         case 'admin':
                             if (!this.validateRoleChangeCommand(match[1], args)) { break; }
-                            this.setAffiliations(
-                                [{'jid': args[0],
-                                'affiliation': 'admin',
-                                'reason': args[1]
-                                }], undefined, this.onCommandError.bind(this)
-                            );
+                            this.setAffiliation('admin',
+                                    [{ 'jid': args[0],
+                                       'reason': args[1]
+                                    }]).fail(this.onCommandError.bind(this));
                             break;
                         case 'ban':
                             if (!this.validateRoleChangeCommand(match[1], args)) { break; }
-                            this.setAffiliations(
-                                [{'jid': args[0],
-                                'affiliation': 'outcast',
-                                'reason': args[1]
-                                }], undefined, this.onCommandError.bind(this)
-                            );
+                            this.setAffiliation('outcast',
+                                    [{ 'jid': args[0],
+                                       'reason': args[1]
+                                    }]).fail(this.onCommandError.bind(this));
                             break;
                         case 'clear':
                             this.clearChatRoomMessages();
@@ -894,12 +919,10 @@
                             break;
                         case 'member':
                             if (!this.validateRoleChangeCommand(match[1], args)) { break; }
-                            this.setAffiliations(
-                                [{'jid': args[0],
-                                'affiliation': 'member',
-                                'reason': args[1]
-                                }], undefined, this.onCommandError.bind(this)
-                            );
+                            this.setAffiliation('member',
+                                    [{ 'jid': args[0],
+                                       'reason': args[1]
+                                    }]).fail(this.onCommandError.bind(this));
                             break;
                         case 'nick':
                             converse.connection.send($pres({
@@ -910,12 +933,10 @@
                             break;
                         case 'owner':
                             if (!this.validateRoleChangeCommand(match[1], args)) { break; }
-                            this.setAffiliations(
-                                [{'jid': args[0],
-                                'affiliation': 'owner',
-                                'reason': args[1]
-                                }], undefined, this.onCommandError.bind(this)
-                            );
+                            this.setAffiliation('owner',
+                                    [{ 'jid': args[0],
+                                       'reason': args[1]
+                                    }]).fail(this.onCommandError.bind(this));
                             break;
                         case 'op':
                             if (!this.validateRoleChangeCommand(match[1], args)) { break; }
@@ -925,12 +946,10 @@
                             break;
                         case 'revoke':
                             if (!this.validateRoleChangeCommand(match[1], args)) { break; }
-                            this.setAffiliations(
-                                [{'jid': args[0],
-                                'affiliation': 'none',
-                                'reason': args[1]
-                                }], undefined, this.onCommandError.bind(this)
-                            );
+                            this.setAffiliation('none',
+                                    [{ 'jid': args[0],
+                                       'reason': args[1]
+                                    }]).fail(this.onCommandError.bind(this));
                             break;
                         case 'topic':
                             converse.connection.send(
@@ -1049,7 +1068,7 @@
                     if (this.model.get('connection_status') ===  Strophe.Status.CONNECTED) {
                         // We have restored a chat room from session storage,
                         // so we don't send out a presence stanza again.
-                        return;
+                        return this;
                     }
                     var stanza = $pres({
                         'from': converse.connection.jid,

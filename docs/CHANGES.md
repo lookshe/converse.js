@@ -4,6 +4,8 @@
 
 - Breaking change: Callbacks for `converse.on` now no longer receive an event
   object as first parameter. [jcbrand]
+- Cancel button shown while the registration form is being fetched wasn't working
+  properly. [jcbrand]
 
 ## 2.0.4 (2016-12-13)
 - #737: Bugfix. Translations weren't being applied. [jcbrand]

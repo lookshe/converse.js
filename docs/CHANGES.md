@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.0 (Unreleased)
+
+- Breaking change: Callbacks for `converse.on` now no longer receive an event
+  object as first parameter. [jcbrand]
+
 ## 2.0.4 (2016-12-13)
 - #737: Bugfix. Translations weren't being applied. [jcbrand]
 - Fetch room info and store it on the room model.

@@ -26,18 +26,18 @@
         factory);
 }(this, function (
         $, _, moment, strophe, utils,
-        converse_api, muc,
+        converse, muc,
         tpl_chatroom_bookmark_form,
         tpl_chatroom_bookmark_toggle,
         tpl_bookmark,
         tpl_bookmarks_list
     ) {
 
-    var Strophe = converse_api.env.Strophe,
-        $iq = converse_api.env.$iq,
-        b64_sha1 = converse_api.env.b64_sha1;
+    var Strophe = converse.env.Strophe,
+        $iq = converse.env.$iq,
+        b64_sha1 = converse.env.b64_sha1;
 
-    converse_api.plugins.add('converse-bookmarks', {
+    converse.plugins.add('converse-bookmarks', {
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's
             // plugin architecture they will replace existing methods on the

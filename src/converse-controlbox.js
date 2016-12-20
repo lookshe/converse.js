@@ -26,7 +26,7 @@
             "converse-rosterview"
     ], factory);
 }(this, function (
-            converse_api,
+            converse,
             tpl_add_contact_dropdown,
             tpl_add_contact_form,
             tpl_change_status_message,
@@ -46,15 +46,15 @@
     var USERS_PANEL_ID = 'users';
 
     // Strophe methods for building stanzas
-    var Strophe = converse_api.env.Strophe,
-        utils = converse_api.env.utils;
+    var Strophe = converse.env.Strophe,
+        utils = converse.env.utils;
     // Other necessary globals
-    var $ = converse_api.env.jQuery,
-        _ = converse_api.env._,
-        moment = converse_api.env.moment;
+    var $ = converse.env.jQuery,
+        _ = converse.env._,
+        moment = converse.env.moment;
 
 
-    converse_api.plugins.add('converse-controlbox', {
+    converse.plugins.add('converse-controlbox', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

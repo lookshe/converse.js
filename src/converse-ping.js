@@ -14,12 +14,12 @@
         "converse-api",
         "strophe.ping"
     ], factory);
-}(this, function (converse_api) {
+}(this, function (converse) {
     "use strict";
     // Strophe methods for building stanzas
-    var Strophe = converse_api.env.Strophe;
+    var Strophe = converse.env.Strophe;
     
-    converse_api.plugins.add('converse-ping', {
+    converse.plugins.add('converse-ping', {
 
         initialize: function () {
             /* The initialize function gets called as soon as the plugin is

@@ -11,12 +11,12 @@
             "converse-api",
             "converse-chatview"
     ], factory);
-}(this, function (converse_api) {
+}(this, function (converse) {
     "use strict";
-    var _ = converse_api.env._,
-        utils = converse_api.env.utils;
+    var _ = converse.env._,
+        utils = converse.env.utils;
 
-    converse_api.plugins.add('converse-headline', {
+    converse.plugins.add('converse-headline', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

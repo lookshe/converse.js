@@ -15,15 +15,15 @@
             "converse-api",
             "tpl!toolbar_otr"
     ], factory);
-}(this, function (otr, converse_api, tpl_toolbar_otr) {
+}(this, function (otr, converse, tpl_toolbar_otr) {
     "use strict";
     // Strophe methods for building stanzas
-    var Strophe = converse_api.env.Strophe,
-        utils = converse_api.env.utils,
-        b64_sha1 = converse_api.env.b64_sha1;
+    var Strophe = converse.env.Strophe,
+        utils = converse.env.utils,
+        b64_sha1 = converse.env.b64_sha1;
     // Other necessary globals
-    var $ = converse_api.env.jQuery,
-        _ = converse_api.env._;
+    var $ = converse.env.jQuery,
+        _ = converse.env._;
 
     var HAS_CSPRNG = ((typeof crypto !== 'undefined') &&
         ((typeof crypto.randomBytes === 'function') ||
@@ -47,7 +47,7 @@
     OTR_CLASS_MAPPING[VERIFIED] = 'verified';
     OTR_CLASS_MAPPING[FINISHED] = 'finished';
 
-    converse_api.plugins.add('converse-otr', {
+    converse.plugins.add('converse-otr', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

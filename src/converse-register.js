@@ -20,7 +20,7 @@
             "converse-controlbox"
     ], factory);
 }(this, function (
-            converse_api,
+            converse,
             tpl_form_username,
             tpl_register_panel,
             tpl_register_tab,
@@ -30,12 +30,12 @@
     "use strict";
 
     // Strophe methods for building stanzas
-    var Strophe = converse_api.env.Strophe,
-        utils = converse_api.env.utils,
-        $iq = converse_api.env.$iq;
+    var Strophe = converse.env.Strophe,
+        utils = converse.env.utils,
+        $iq = converse.env.$iq;
     // Other necessary globals
-    var $ = converse_api.env.jQuery,
-        _ = converse_api.env._;
+    var $ = converse.env.jQuery,
+        _ = converse.env._;
     
     // Add Strophe Namespaces
     Strophe.addNamespace('REGISTER', 'jabber:iq:register');
@@ -50,7 +50,7 @@
     Strophe.Status.CONFLICT        = i + 3;
     Strophe.Status.NOTACCEPTABLE   = i + 5;
 
-    converse_api.plugins.add('converse-register', {
+    converse.plugins.add('converse-register', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

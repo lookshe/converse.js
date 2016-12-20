@@ -8,14 +8,14 @@
 
 (function (root, factory) {
     define("converse-notification", ["converse-api"], factory);
-}(this, function (converse_api) {
+}(this, function (converse) {
     "use strict";
-    var $ = converse_api.env.jQuery,
-        utils = converse_api.env.utils,
-        Strophe = converse_api.env.Strophe,
-        _ = converse_api.env._;
+    var $ = converse.env.jQuery,
+        utils = converse.env.utils,
+        Strophe = converse.env.Strophe,
+        _ = converse.env._;
 
-    converse_api.plugins.add('converse-notification', {
+    converse.plugins.add('converse-notification', {
 
         initialize: function () {
             /* The initialize function gets called as soon as the plugin is

@@ -14,12 +14,12 @@
             "converse-muc", // XXX: would like to remove this
             "converse-controlbox"
     ], factory);
-}(this, function (converse_api, tpl_dragresize) {
+}(this, function (converse, tpl_dragresize) {
     "use strict";
-    var $ = converse_api.env.jQuery,
-        _ = converse_api.env._;
+    var $ = converse.env.jQuery,
+        _ = converse.env._;
 
-    converse_api.plugins.add('converse-dragresize', {
+    converse.plugins.add('converse-dragresize', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

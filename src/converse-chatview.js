@@ -17,7 +17,7 @@
             "tpl!avatar"
     ], factory);
 }(this, function (
-            converse_api,
+            converse,
             tpl_chatbox,
             tpl_new_day,
             tpl_action,
@@ -26,19 +26,19 @@
             tpl_avatar
     ) {
     "use strict";
-    var $ = converse_api.env.jQuery,
-        utils = converse_api.env.utils,
-        Strophe = converse_api.env.Strophe,
-        $msg = converse_api.env.$msg,
-        _ = converse_api.env._,
-        moment = converse_api.env.moment;
+    var $ = converse.env.jQuery,
+        utils = converse.env.utils,
+        Strophe = converse.env.Strophe,
+        $msg = converse.env.$msg,
+        _ = converse.env._,
+        moment = converse.env.moment;
     var KEY = {
         ENTER: 13,
         FORWARD_SLASH: 47
     };
 
 
-    converse_api.plugins.add('converse-chatview', {
+    converse.plugins.add('converse-chatview', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

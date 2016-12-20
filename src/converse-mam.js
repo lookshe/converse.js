@@ -15,13 +15,13 @@
             "converse-muc", // Could be made a soft dependency
             "strophe.rsm"
     ], factory);
-}(this, function (converse_api) {
+}(this, function (converse) {
     "use strict";
-    var $ = converse_api.env.jQuery,
-        Strophe = converse_api.env.Strophe,
-        $iq = converse_api.env.$iq,
-        _ = converse_api.env._,
-        moment = converse_api.env.moment;
+    var $ = converse.env.jQuery,
+        Strophe = converse.env.Strophe,
+        $iq = converse.env.$iq,
+        _ = converse.env._,
+        moment = converse.env.moment;
 
     var RSM_ATTRIBUTES = ['max', 'first', 'last', 'after', 'before', 'index', 'count'];
     // XEP-0313 Message Archive Management
@@ -31,7 +31,7 @@
     Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
 
 
-    converse_api.plugins.add('converse-mam', {
+    converse.plugins.add('converse-mam', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

@@ -16,21 +16,21 @@
             "tpl!roster_item"
     ], factory);
 }(this, function (
-            converse_api, 
+            converse, 
             tpl_group_header,
             tpl_pending_contact,
             tpl_requesting_contact,
             tpl_roster,
             tpl_roster_item) {
     "use strict";
-    var $ = converse_api.env.jQuery,
-        utils = converse_api.env.utils,
-        Strophe = converse_api.env.Strophe,
-        $iq = converse_api.env.$iq,
-        b64_sha1 = converse_api.env.b64_sha1,
-        _ = converse_api.env._;
+    var $ = converse.env.jQuery,
+        utils = converse.env.utils,
+        Strophe = converse.env.Strophe,
+        $iq = converse.env.$iq,
+        b64_sha1 = converse.env.b64_sha1,
+        _ = converse.env._;
 
-    converse_api.plugins.add('rosterview', {
+    converse.plugins.add('rosterview', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

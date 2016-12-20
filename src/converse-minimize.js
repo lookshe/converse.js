@@ -18,19 +18,19 @@
             "converse-muc"
     ], factory);
 }(this, function (
-        converse_api,
+        converse,
         tpl_chatbox_minimize,
         tpl_toggle_chats,
         tpl_trimmed_chat,
         tpl_chats_panel
     ) {
     "use strict";
-    var $ = converse_api.env.jQuery,
-        _ = converse_api.env._,
-        b64_sha1 = converse_api.env.b64_sha1,
-        moment = converse_api.env.moment;
+    var $ = converse.env.jQuery,
+        _ = converse.env._,
+        b64_sha1 = converse.env.b64_sha1,
+        moment = converse.env.moment;
 
-    converse_api.plugins.add('converse-minimize', {
+    converse.plugins.add('converse-minimize', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

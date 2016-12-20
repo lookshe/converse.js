@@ -12,14 +12,14 @@
             "converse-api",
             "strophe.vcard",
     ], factory);
-}(this, function (_converse, converse_api) {
+}(this, function (_converse, converse) {
     "use strict";
-    var Strophe = converse_api.env.Strophe,
-        $ = converse_api.env.jQuery,
-        _ = converse_api.env._,
-        moment = converse_api.env.moment;
+    var Strophe = converse.env.Strophe,
+        $ = converse.env.jQuery,
+        _ = converse.env._,
+        moment = converse.env.moment;
 
-    converse_api.plugins.add('converse-vcard', {
+    converse.plugins.add('converse-vcard', {
 
         overrides: {
             // Overrides mentioned here will be picked up by converse.js's

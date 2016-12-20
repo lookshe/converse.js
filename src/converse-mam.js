@@ -10,13 +10,12 @@
 
 (function (root, factory) {
     define("converse-mam", [
-            "converse-core",
             "converse-api",
             "converse-chatview", // Could be made a soft dependency
             "converse-muc", // Could be made a soft dependency
             "strophe.rsm"
     ], factory);
-}(this, function (_converse, converse_api) {
+}(this, function (converse_api) {
     "use strict";
     var $ = converse_api.env.jQuery,
         Strophe = converse_api.env.Strophe,
@@ -43,6 +42,7 @@
 
             Features: {
                 addClientFeatures: function () {
+                    var _converse = this.__super__._converse;
                     _converse.connection.disco.addFeature(Strophe.NS.MAM);
                     return this.__super__.addClientFeatures.apply(this, arguments);
                 }
@@ -66,6 +66,7 @@
                 },
 
                 afterMessagesFetched: function () {
+                    var _converse = this.__super__._converse;
                     if (this.disable_mam || !_converse.features.findWhere({'var': Strophe.NS.MAM})) {
                         return this.__super__.afterMessagesFetched.apply(this, arguments);
                     }
@@ -88,6 +89,7 @@
                      * Then, upon receiving them, call onMessage on the chat box,
                      * so that they are displayed inside it.
                      */
+                    var _converse = this.__super__._converse;
                     if (!_converse.features.findWhere({'var': Strophe.NS.MAM})) {
                         _converse.log("Attempted to fetch archived messages but this user's server doesn't support XEP-0313");
                         return;
@@ -110,6 +112,7 @@
                 },
 
                 onScroll: function (ev) {
+                    var _converse = this.__super__._converse;
                     if ($(ev.target).scrollTop() === 0 && this.model.messages.length) {
                         this.fetchArchivedMessages({
                             'before': this.model.messages.at(0).get('archive_id'),
@@ -138,6 +141,8 @@
             /* The initialize function gets called as soon as the plugin is
              * loaded by Converse.js's plugin machinery.
              */
+            var _converse = this._converse;
+
             this.updateSettings({
                 archived_messages_page_size: '20',
                 message_archiving: 'never', // Supported values are 'always', 'never', 'roster' (https://xmpp.org/extensions/xep-0313.html#prefs)

@@ -8,7 +8,6 @@
 
 (function (root, factory) {
     define("converse-rosterview", [
-            "converse-core",
             "converse-api",
             "tpl!group_header",
             "tpl!pending_contact",
@@ -17,7 +16,6 @@
             "tpl!roster_item"
     ], factory);
 }(this, function (
-            _converse,
             converse_api, 
             tpl_group_header,
             tpl_pending_contact,
@@ -25,19 +23,12 @@
             tpl_roster,
             tpl_roster_item) {
     "use strict";
-    _converse.templates.group_header = tpl_group_header;
-    _converse.templates.pending_contact = tpl_pending_contact;
-    _converse.templates.requesting_contact = tpl_requesting_contact;
-    _converse.templates.roster = tpl_roster;
-    _converse.templates.roster_item = tpl_roster_item;
-
     var $ = converse_api.env.jQuery,
         utils = converse_api.env.utils,
         Strophe = converse_api.env.Strophe,
         $iq = converse_api.env.$iq,
         b64_sha1 = converse_api.env.b64_sha1,
-        _ = converse_api.env._,
-        __ = utils.__.bind(_converse);
+        _ = converse_api.env._;
 
     converse_api.plugins.add('rosterview', {
 
@@ -66,6 +57,7 @@
                 comparator: function () {
                     // RosterGroupsComparator only gets set later (once i18n is
                     // set up), so we need to wrap it in this nameless function.
+                    var _converse = this.__super__._converse;
                     return _converse.RosterGroupsComparator.apply(this, arguments);
                 }
             }
@@ -76,6 +68,16 @@
             /* The initialize function gets called as soon as the plugin is
              * loaded by converse.js's plugin machinery.
              */
+            var _converse = this._converse,
+                __ = _converse.__;
+
+            // Add new HTML templates
+            _converse.templates.group_header = tpl_group_header;
+            _converse.templates.pending_contact = tpl_pending_contact;
+            _converse.templates.requesting_contact = tpl_requesting_contact;
+            _converse.templates.roster = tpl_roster;
+            _converse.templates.roster_item = tpl_roster_item;
+
             this.updateSettings({
                 allow_chat_pending_contacts: false,
                 allow_contact_removal: true,

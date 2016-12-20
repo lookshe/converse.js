@@ -11,7 +11,6 @@
  */
 (function (root, factory) {
     define("converse-register", [
-            "converse-core",
             "converse-api",
             "tpl!form_username",
             "tpl!register_panel",
@@ -21,7 +20,6 @@
             "converse-controlbox"
     ], factory);
 }(this, function (
-            _converse,
             converse_api,
             tpl_form_username,
             tpl_register_panel,
@@ -30,11 +28,6 @@
             tpl_registration_request) {
 
     "use strict";
-    _converse.templates.form_username = tpl_form_username;
-    _converse.templates.register_panel = tpl_register_panel;
-    _converse.templates.register_tab = tpl_register_tab;
-    _converse.templates.registration_form = tpl_registration_form;
-    _converse.templates.registration_request = tpl_registration_request;
 
     // Strophe methods for building stanzas
     var Strophe = converse_api.env.Strophe,
@@ -43,8 +36,6 @@
     // Other necessary globals
     var $ = converse_api.env.jQuery,
         _ = converse_api.env._;
-    // For translations
-    var __ = utils.__.bind(_converse);
     
     // Add Strophe Namespaces
     Strophe.addNamespace('REGISTER', 'jabber:iq:register');
@@ -92,14 +83,21 @@
             /* The initialize function gets called as soon as the plugin is
              * loaded by converse.js's plugin machinery.
              */
-            var _converse = this._converse;
+            var _converse = this._converse,
+                __ = _converse.__;
+
+            // Add new templates
+            _converse.templates.form_username = tpl_form_username;
+            _converse.templates.register_panel = tpl_register_panel;
+            _converse.templates.register_tab = tpl_register_tab;
+            _converse.templates.registration_form = tpl_registration_form;
+            _converse.templates.registration_request = tpl_registration_request;
 
             this.updateSettings({
                 allow_registration: true,
                 domain_placeholder: __(" e.g. conversejs.org"),  // Placeholder text shown in the domain input on the registration form
                 providers_link: 'https://xmpp.net/directory.php', // Link to XMPP providers shown on registration page
             });
-
 
             _converse.RegisterPanel = Backbone.View.extend({
                 tagName: 'div',

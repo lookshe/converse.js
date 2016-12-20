@@ -11,11 +11,10 @@
  */
 (function (root, factory) {
     define("converse-ping", [
-        "converse-core",
         "converse-api",
         "strophe.ping"
     ], factory);
-}(this, function (_converse, converse_api) {
+}(this, function (converse_api) {
     "use strict";
     // Strophe methods for building stanzas
     var Strophe = converse_api.env.Strophe;

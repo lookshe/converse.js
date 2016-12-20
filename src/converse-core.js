@@ -167,7 +167,8 @@
 
         // Translation machinery
         // ---------------------
-        var __ = utils.__.bind(this);
+        var __ = _converse.__ = utils.__.bind(_converse);
+        _converse.___ = utils.___;
         var DESC_GROUP_TOGGLE = __('Click to hide these contacts');
 
         // Default configuration values
